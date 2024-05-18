@@ -34,6 +34,6 @@ class Moves:
         while x != to_cell[0] or y != to_cell[1]:
             x += dx
             y += dy
-            if board[x][y] != "E" and x != my_base[0] and y != my_base[1]:
+            if board[x][y] != "E" and (x, y) != my_base:
                     return False
         return True
