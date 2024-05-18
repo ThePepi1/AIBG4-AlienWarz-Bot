@@ -2,6 +2,11 @@ import json
 
 
 class Player:
+    RAW_DIAMOND_WEIGHT = 5
+    PROCESSED_DIAMOND_WEIGHT = 3
+    RAW_MINERAL_WEIGHT = 2
+    PROCESSED_MINERAL_WEIGHT = 1
+
     def __init__(self):
         self.name = "Player"
         self.energy = 1000
@@ -34,6 +39,12 @@ class Player:
 
     def isDazed(self):
         return self.daze_turns > 0
+
+    def isFrozen(self):
+        return self.frozen_turns > 0
+    
+    def backpackWeight(self):
+        return self.raw_minerals * self.RAW_MINERAL_WEIGHT + self.processed_minerals * self.PROCESSED_MINERAL_WEIGHT + self.raw_diamonds * self.RAW_DIAMOND_WEIGHT + self.processed_diamonds * self.PROCESSED_DIAMOND_WEIGHT
 
     def __str__(self) -> str:
         return json.dumps({

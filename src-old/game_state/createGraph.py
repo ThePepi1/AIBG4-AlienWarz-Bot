@@ -4,6 +4,7 @@ from game_state import heap
 from find_path import find_path_least_moves
 from vectors import Vectors
 import heapq
+from brain import Brain
 
 def createpath():
     ores = findOres()
@@ -30,7 +31,7 @@ def createpath():
                 best = path
         if best is None:
             continue
-        heapq.heappush(ores_with_lenght, (len(best), best, ore))
+        heapq.heappush(ores_with_lenght, (len(best), Brain.get_path_length(best), best, ore))
     # ores_with_lenght.sort()
     # log(f"Ores with length: {ores_with_lenght}")
     return ores_with_lenght

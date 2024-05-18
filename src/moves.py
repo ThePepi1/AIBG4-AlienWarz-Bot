@@ -1,14 +1,13 @@
-from logger import log
+from utils.logger import log
 
-from game_state.game_state import state
 class Moves:
     @staticmethod
-    def move(x, y):
-        if state.me().isDazed():
-            dx = x - state.me().position[0]
-            dy = y - state.me().position[1]
-            x = state.me().position[0] - dx
-            y = state.me().position[1] - dy
+    def move(x, y, me):
+        if me.isDazed():
+            dx = x - me().position[0]
+            dy = y - me().position[1]
+            x = me().position[0] - dx
+            y = me().position[1] - dy
         log(f"move {x} {y}")
         print(f"move {x} {y}", flush=True)
     @staticmethod
