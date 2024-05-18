@@ -43,5 +43,5 @@ def energy_to_mine(state: GameState, path, dig, ore):
         weight = 5
         energy = 6
     length = get_path_length(state.me().position, path)
-    energy = length * (1 + min(1 + dig * weight, 8)) + dig * energy
+    energy = length * (1 + 1 + dig * weight) + dig * energy
     return  state.me().energy - energy - EPSILON
