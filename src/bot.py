@@ -60,13 +60,29 @@ class Bot:
                 self.current_action = Bot.MINE
             return
         if self.current_action == Bot.MINE:
-            x, y = self.mine
-            Moves.mine(x, y)
-            self.mine_number -= 1
-            if self.mine_number == 0:
+            if Moves.check_if_can_mine(self.mine, self.state.board):
+                x, y = self.mine
+                Moves.mine(x, y, self.state.me())
+                self.mine_number -= 1
+                if self.mine_number == 0:
+                    self.current_action = Bot.GO_TO_HOME
+                    self.path = find_path_least_moves(self.state.me().position, self.state.my_base(), self.state.board)
+                return
+            else:
+                log("CANT MINE")
                 self.current_action = Bot.GO_TO_HOME
                 self.path = find_path_least_moves(self.state.me().position, self.state.my_base(), self.state.board)
-            return
+                if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board, self.state.my_base()):
+                    x,y = self.path.pop(0)
+                    Moves.move(x,y, self.state.me())
+                else:
+                    log("CANT MOVE HOME")
+                    Moves.rest()
+                if len(self.path) == 0:
+                    self.current_action = Bot.CONVERT
+                return
+                retur
+                
         if self.current_action == Bot.GO_TO_HOME:
             if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board, self.state.my_base()):
                 x,y = self.path.pop(0)

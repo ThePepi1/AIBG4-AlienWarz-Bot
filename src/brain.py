@@ -1,8 +1,9 @@
 from utils.path import find_path_least_moves
 from state.game_state import GameState
 from utils.path import get_path_length
+from utils.logger import log
 
-EPSILON = 50
+EPSILON = 75
 
 def should_block(state: GameState):
     return False
@@ -37,11 +38,11 @@ def how_much_energy_to_convert(state: GameState, energy):
 def energy_to_mine(state: GameState, path, dig, ore):
     x, y = ore
     if state.board[x][y][0] == "M":
-        energy = 5
-        weight = 2
+        energy_to_dig = 5
     else:
-        weight = 5
-        energy = 6
+        energy_to_dig = 6
     length = get_path_length(state.me().position, path)
-    energy = length * (1 + 1 + dig * weight) + dig * energy
+    log(f"FROM ENERGY TO MINE lenght {length} dig {dig} energy to dig {energy_to_dig} backpack {state.me().backpack_capacity}")
+
+    energy = length * (1 + min(1 + state.me().backpack_capacity, 8)) + dig * energy_to_dig
     return  state.me().energy - energy - EPSILON

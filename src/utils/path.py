@@ -87,9 +87,9 @@ def get_path_length(my_position, path):
     i = 0
     while i < len(path):
         next = path[i]
-        dx = next[0] - current[0]
-        dy = next[1] - current[1]
-        squeres = dx + dy
+        dx = abs(next[0] - current[0])
+        dy = abs(next[1] - current[1])
+        squeres = int(dx + dy)
         total += squeres
         current = next
         i += 1

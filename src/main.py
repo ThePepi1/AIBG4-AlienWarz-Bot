@@ -11,4 +11,6 @@ while True:
     bot.make_move(new_state)
     end = time.perf_counter()
     log(f"total time {end - start}")
-
+    log(f"{bot.state.me().energy}")
+    log(f"End make move")
+    log("="*20)
