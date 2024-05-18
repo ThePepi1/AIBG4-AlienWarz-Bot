@@ -40,14 +40,22 @@ class Bot:
             self.target = stats[4]
             self.mine_number = stats[5]
             self.path = stats[2]
-            x,y = self.path.pop(0)
-            Moves.move(x,y, self.state.me())
+            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board):
+                x,y = self.path.pop(0)
+                Moves.move(x,y, self.state.me())
+            else:
+                log("CANT MOVE TO MINE")
+                Moves.rest()
             if len(self.path) == 0:
                 self.current_action = Bot.MINE
             return
         if self.current_action == Bot.GO_TO_MINE:
-            x, y = self.path.pop(0)
-            Moves.move(x, y, self.state.me())
+            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board):
+                x,y = self.path.pop(0)
+                Moves.move(x,y, self.state.me())
+            else:
+                log("CANT MOVE TO MINE")
+                Moves.rest()
             if len(self.path) == 0:
                 self.current_action = Bot.MINE
             return
@@ -60,8 +68,12 @@ class Bot:
                 self.path = find_path_least_moves(self.state.me().position, self.state.my_base(), self.state.board)
             return
         if self.current_action == Bot.GO_TO_HOME:
-            x, y = self.path.pop(0)
-            Moves.move(x, y, self.state.me())
+            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board):
+                x,y = self.path.pop(0)
+                Moves.move(x,y, self.state.me())
+            else:
+                log("CANT MOVE HOME")
+                Moves.rest()
             if len(self.path) == 0:
                 self.current_action = Bot.CONVERT
             return
@@ -104,20 +116,35 @@ class Bot:
                     Moves.convert((0, 0), (diamonds, minerals), (self.state.me().raw_diamonds - diamonds, self.state.me().raw_minerals - minerals))
             return
         if self.current_action == Bot.BLOCK:
-            x, y = self.path.pop(0)
-            Moves.move(x, y, self.state.me())
+            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board):
+                x,y = self.path.pop(0)
+                Moves.move(x,y, self.state.me())
+            else:
+                log("CANT MOVE BLOCK")
+                Moves.rest()
             if len(self.path) == 0:
                 self.current_action = Bot.FACTORY
             return
         if self.current_action == Bot.FACTORY:
-            x, y = self.state.factory
-            Moves.build(x, y)
-            self.current_action = Bot.POSITION
+            if self.state.board[self.state.factory[0]][self.state.factory[1]] == "E":
+                x, y = self.state.factory
+                Moves.build(x, y)
+            else:
+                self.current_action = Bot.POSITION
+                if Moves.check_if_can_move(self.state.me().position, self.state.me_block, self.state.board):
+                    x,y = self.state.me_block
+                    Moves.move(x,y, self.state.me())
+                    self.current_action = Bot.REST
+                else:
+                    Moves.rest()
             return
         if self.current_action == Bot.POSITION:
-            x, y = self.state.me_block
-            Moves.move(x, y, self.state.me())
-            self.current_action = Bot.REST
+            if Moves.check_if_can_move(self.state.me().position, self.state.me_block, self.state.board):
+                x,y = self.state.me_block
+                Moves.move(x,y, self.state.me())
+                self.current_action = Bot.REST
+            else:
+                Moves.rest()
             return
         Moves.rest()
         #print("rest", flush=True)
