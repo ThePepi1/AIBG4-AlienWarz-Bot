@@ -2,7 +2,10 @@ from utils.path import find_path_least_moves
 from state.game_state import GameState
 from utils.path import get_path_length
 
+EPSILON = 50
+
 def should_block(state: GameState):
+    return False
     moves = len(state.path_to_opponent) + 3
     if state.me().xp > state.opponent().xp:
         return True
@@ -41,4 +44,4 @@ def energy_to_mine(state: GameState, path, dig, ore):
         energy = 6
     length = get_path_length(state.me().position, path)
     energy = length * (1 + min(1 + dig * weight, 8)) + dig * energy
-    return  state.me().energy - energy
+    return  state.me().energy - energy - EPSILON

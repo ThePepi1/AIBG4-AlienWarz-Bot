@@ -40,7 +40,7 @@ class Bot:
             self.target = stats[4]
             self.mine_number = stats[5]
             self.path = stats[2]
-            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board):
+            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board, self.state.my_base()):
                 x,y = self.path.pop(0)
                 Moves.move(x,y, self.state.me())
             else:
@@ -50,7 +50,7 @@ class Bot:
                 self.current_action = Bot.MINE
             return
         if self.current_action == Bot.GO_TO_MINE:
-            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board):
+            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board, self.state.my_base()):
                 x,y = self.path.pop(0)
                 Moves.move(x,y, self.state.me())
             else:
@@ -68,7 +68,7 @@ class Bot:
                 self.path = find_path_least_moves(self.state.me().position, self.state.my_base(), self.state.board)
             return
         if self.current_action == Bot.GO_TO_HOME:
-            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board):
+            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board, self.state.my_base()):
                 x,y = self.path.pop(0)
                 Moves.move(x,y, self.state.me())
             else:
@@ -109,6 +109,7 @@ class Bot:
                 self.mine_number = stats[5]
                 self.path = stats[2]
                 energy = brain.energy_to_mine(self.state, self.path, self.mine_number, self.mine)
+                log(f"energy to mine {energy}, my energy {self.state.me().energy}")
                 if energy > 0:
                     Moves.convert((0, 0), (0, 0), (self.state.me().raw_diamonds, self.state.me().raw_minerals))
                 else:
@@ -116,7 +117,7 @@ class Bot:
                     Moves.convert((0, 0), (diamonds, minerals), (self.state.me().raw_diamonds - diamonds, self.state.me().raw_minerals - minerals))
             return
         if self.current_action == Bot.BLOCK:
-            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board):
+            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board, self.state.my_base()):
                 x,y = self.path.pop(0)
                 Moves.move(x,y, self.state.me())
             else:
@@ -131,7 +132,7 @@ class Bot:
                 Moves.build(x, y)
             else:
                 self.current_action = Bot.POSITION
-                if Moves.check_if_can_move(self.state.me().position, self.state.me_block, self.state.board):
+                if Moves.check_if_can_move(self.state.me().position, self.state.me_block, self.state.board, self.state.my_base()):
                     x,y = self.state.me_block
                     Moves.move(x,y, self.state.me())
                     self.current_action = Bot.REST
