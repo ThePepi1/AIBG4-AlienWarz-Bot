@@ -30,7 +30,8 @@ class Moves:
         log(f"build {x} {y}")
         print(f"build {x} {y}", flush=True)
     @staticmethod
-    def convert(coins, energy, xp):
+    def convert(coins, energy, xp, me):
+        me.energy += energy[0] * 100 + energy[1] * 250
         log(f"conv {coins[0]} diamond {coins[1]} mineral to coins, {energy[0]} diamond {energy[1]} mineral to energy, {xp[0]} diamond {xp[1]} mineral to xp")
         print(f"conv {coins[0]} diamond {coins[1]} mineral to coins, {energy[0]} diamond {energy[1]} mineral to energy, {xp[0]} diamond {xp[1]} mineral to xp", flush=True)
     @staticmethod

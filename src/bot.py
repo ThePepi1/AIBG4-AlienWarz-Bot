@@ -50,6 +50,7 @@ class Bot:
                 self.current_action = Bot.MINE
             return
         if self.current_action == Bot.GO_TO_MINE:
+            ### TODO: check if we have enough energy to move
             if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board, self.state.my_base()):
                 x,y = self.path.pop(0)
                 Moves.move(x,y, self.state.me())
@@ -60,6 +61,7 @@ class Bot:
                 self.current_action = Bot.MINE
             return
         if self.current_action == Bot.MINE:
+            ### TODO: check if we have enough energy to mine
             if Moves.check_if_can_mine(self.mine, self.state.board):
                 x, y = self.mine
                 Moves.mine(x, y, self.state.me())
@@ -81,10 +83,14 @@ class Bot:
                 if len(self.path) == 0:
                     self.current_action = Bot.CONVERT
                 return
-                retur
                 
         if self.current_action == Bot.GO_TO_HOME:
-            if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board, self.state.my_base()):
+            ### TODO: check if we have enough energy to move
+            log(f"{(self.state.me().position, self.path, self.state.board, self.state.my_base())}")
+            if self.path is None:
+                self.path = find_path_least_moves(self.state.me().position, self.state.my_base(), self.state.board)
+            log(f"{self.path}")
+            if len(self.path) > 0 and Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board, self.state.my_base()):
                 x,y = self.path.pop(0)
                 Moves.move(x,y, self.state.me())
             else:
@@ -94,29 +100,7 @@ class Bot:
                 self.current_action = Bot.CONVERT
             return
         if self.current_action == Bot.CONVERT:
-            # calucate how much energy we need to convert
-            if brain.should_block(self.state):
-                log("should block")
-                energy = brain.energy_to_block(self.state)
-                if energy > 0:
-                    Moves.convert((0, 0), (0, 0), (self.state.me().raw_diamonds, self.state.me().raw_minerals))
-                    self.current_action = Bot.BLOCK
-                    self.path = self.state.path_to_opponent
-                elif brain.can_gain_energy(self.state) > -energy:
-                    diamonds, minerals = brain.how_much_energy_to_convert(self.state, energy)
-                    Moves.convert((0, 0), (diamonds, minerals), (self.state.me().raw_diamonds - diamonds, self.state.me().raw_minerals - minerals))
-                    self.current_action = Bot.BLOCK
-                    self.path = self.state.path_to_opponent
-                else:
-                    Moves.convert((0, 0), (self.state.me().raw_diamonds, self.state.me().raw_minerals), (0, 0))
-                    self.current_action = Bot.GO_TO_MINE
-                    stats = heapq.heappop(self.state.ores)
-                    self.mine = stats[3]
-                    self.target = stats[4]
-                    self.mine_number = stats[5]
-                    self.path = stats[2]
-            else:
-                log("should not block")
+            def go_to_mining(convert=True):
                 self.current_action = Bot.GO_TO_MINE
                 self.state.find_ores()
                 stats = heapq.heappop(self.state.ores)
@@ -124,13 +108,46 @@ class Bot:
                 self.target = stats[4]
                 self.mine_number = stats[5]
                 self.path = stats[2]
+                if not convert:
+                    return
                 energy = brain.energy_to_mine(self.state, self.path, self.mine_number, self.mine)
                 log(f"energy to mine {energy}, my energy {self.state.me().energy}")
                 if energy > 0:
-                    Moves.convert((0, 0), (0, 0), (self.state.me().raw_diamonds, self.state.me().raw_minerals))
+                    Moves.convert((0, 0), (0, 0), (self.state.me().raw_diamonds, self.state.me().raw_minerals), self.state.me())
                 else:
                     diamonds, minerals = brain.how_much_energy_to_convert(self.state, energy)
-                    Moves.convert((0, 0), (diamonds, minerals), (self.state.me().raw_diamonds - diamonds, self.state.me().raw_minerals - minerals))
+                    Moves.convert((0, 0), (diamonds, minerals), (self.state.me().raw_diamonds - diamonds, self.state.me().raw_minerals - minerals), self.state.me())
+                return
+            energy = brain.energy_to_block(self.state)
+            diamonds, minerals = brain.how_much_energy_to_convert(self.state, energy)  
+            xp_to_buy = (self.state.me().raw_diamonds - diamonds) * 25 + (self.state.me().raw_minerals - minerals) * 10
+            if energy > 0:
+                
+                #### TODO: check if we can block him
+                if brain.should_block(self.state, xp_to_buy):
+                    Moves.convert((0, 0), (0, 0), (self.state.me().raw_diamonds, self.state.me().raw_minerals), self.state.me())
+                    log("should block")
+                    log(f"{self.state.opponent()}")
+                    self.current_action = Bot.BLOCK
+                    self.path = self.state.path_to_opponent
+                else:
+                    log("should not block")
+                    go_to_mining()
+            elif brain.can_gain_energy(self.state) > -energy:
+                
+                 ### TODO: check if we can block him
+                if brain.should_block(self.state, xp_to_buy):
+                    log("should block")
+                    Moves.convert((0, 0), (diamonds, minerals), (self.state.me().raw_diamonds - diamonds, self.state.me().raw_minerals - minerals), self.state.me())
+                    self.current_action = Bot.BLOCK
+                    self.path = self.state.path_to_opponent
+                else:
+                    log("should not block")
+                    go_to_mining()
+            else:
+                Moves.convert((0, 0), (self.state.me().raw_diamonds, self.state.me().raw_minerals), (0, 0), self.state.me())
+                go_to_mining(False)
+                
             return
         if self.current_action == Bot.BLOCK:
             if Moves.check_if_can_move(self.state.me().position, self.path[0], self.state.board, self.state.my_base()):

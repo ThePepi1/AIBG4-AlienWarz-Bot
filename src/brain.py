@@ -1,16 +1,47 @@
 from utils.path import find_path_least_moves
 from state.game_state import GameState
 from utils.path import get_path_length
+from utils.ores import find_oponents_ores
 from utils.logger import log
+import heapq
 
 EPSILON = 75
 
-def should_block(state: GameState):
-    return False
-    moves = len(state.path_to_opponent) + 3
-    if state.me().xp > state.opponent().xp:
+def should_block(state: GameState, additional_xp = 0):
+    # return False
+    our_xp = state.me().xp + additional_xp
+    our_moves = len(state.path_to_opponent) + 3
+    if our_xp <= state.opponent().xp:
+        return False
+    his_moves_to_base = len(find_path_least_moves(state.opponent().position, state.opponent_base(), state.board))
+    if our_xp > state.opponent().xp and our_moves < his_moves_to_base:
+        log(f"SHOULD BLOCK: our_xp {our_xp} his_xp {state.opponent().xp} our_moves {our_moves} his_moves {his_moves_to_base}")
         return True
-    return False
+    # we can block him before he reaches his base and we have more xp
+    his_backpack = state.opponent().raw_diamonds, state.opponent().raw_minerals, \
+                state.opponent().processed_diamonds, state.opponent().processed_minerals
+    his_backpack_value = (his_backpack[0] + his_backpack[2]) * 25 + (his_backpack[1] + his_backpack[3]) * 10
+    # if he can overpower us with his current backpack we should not block him
+    if our_xp <= state.opponent().xp + his_backpack_value and our_moves >= his_moves_to_base:
+        
+        return False
+    
+    ores = find_oponents_ores(state.opponent(), state.opponent_base(), state.board)
+    if len(ores) == 0:
+        return True
+    while ores:
+        stats = heapq.heappop(ores)
+        log(f"{stats}")
+        xp = stats[6]
+        moves = stats[0]
+        if moves > our_moves:
+            log(f"SHOULD BLOCK: xp {xp} moves {moves} our_xp {our_xp} our_moves {our_moves} Ores")
+            return True
+        if xp + state.opponent().xp >= our_xp:
+            return False
+    ### TODO: check factories
+    return True
+
 
 def energy_to_block(state: GameState):
     length = get_path_length(state.me().position, state.path_to_opponent)
