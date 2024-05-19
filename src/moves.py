@@ -5,10 +5,10 @@ class Moves:
     def move(x, y, me):
         if me.isDazed():
             log("dazed")
-            dx = x - me().position[0]
-            dy = y - me().position[1]
-            x = me().position[0] - dx
-            y = me().position[1] - dy
+            dx = x - me.position[0]
+            dy = y - me.position[1]
+            x = me.position[0] - dx
+            y = me.position[1] - dy
         log(f"move {x} {y}")
         dx = abs(me.position[0] - x)
         dy = abs(me.position[1] - y)
