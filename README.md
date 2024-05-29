@@ -42,3 +42,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Hackathon results (for those who are interested.)
 
 Unfortunatly there was a bug. When our bot is dazed and we switch the direction of movement we are getting the current position of out bot from ```Player``` object localy named ```me``` but it was mistakenly called as a function, since the object itself is derived from ```GameState``` object using ```me()``` method. So during quarter finals our bot crashed.
+
+## Thank you for participating note
+
+<img width="100%" src="./zahvalnica.jpg">
