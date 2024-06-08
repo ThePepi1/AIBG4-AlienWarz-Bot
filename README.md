@@ -45,4 +45,4 @@ Unfortunatly there was a bug. When our bot is dazed and we switch the direction 
 
 ## Thank you for participating note
 
-<img width="100%" src="./zahvalnica.jpg">
+<img width="100%" src="./petar popovic_page-0001.jpg">
